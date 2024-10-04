@@ -1,0 +1,12 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MyWarmer" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="android:fontFamily">@font/roboto_bold</item>
+        <item name="android:textStyle">bold</item>
+        <item name="tint">@color/color_light</item>
+        <item name="drawableTint">@color/color_light</item>
+    </style>
+
+    <style name="Theme.MyWarmer" parent="Base.Theme.MyWarmer" />
+</resources>

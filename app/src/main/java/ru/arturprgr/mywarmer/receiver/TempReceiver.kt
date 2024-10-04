@@ -1,13 +1,17 @@
 package ru.arturprgr.mywarmer.receiver
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.BatteryManager
+import android.util.Log
 
-class TempReceiver : BroadcastReceiver() {
-
+class TempReceiver(private val view: android.widget.TextView) : BroadcastReceiver() {
+    @SuppressLint("SetTextI18n")
     override fun onReceive(context: Context, intent: Intent) {
-        // This method is called when the BroadcastReceiver is receiving an Intent broadcast.
-        TODO("TempReceiver.onReceive() is not implemented")
+        val temp = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1).toFloat() / 10
+        Log.d("TempLog", "${temp}°C")
+        view.text = "$temp°C"
     }
 }
