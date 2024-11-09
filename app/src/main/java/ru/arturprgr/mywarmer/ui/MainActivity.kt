@@ -15,13 +15,12 @@ import ru.arturprgr.mywarmer.service.WarmService
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var intent: Intent
     private var isStarted: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        intent = Intent(this@MainActivity, WarmService::class.java)
+
         enableEdgeToEdge()
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -34,7 +33,6 @@ class MainActivity : AppCompatActivity() {
             registerReceiver(
                 TempReceiver(textBatteryTemp), IntentFilter(Intent.ACTION_BATTERY_CHANGED)
             )
-            intent.putExtra("intensity", seekBarIntensity.progress)
 
             buttonInfo.setOnClickListener {
                 createDialog(
@@ -50,18 +48,19 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
-
             buttonStart.setOnClickListener {
+                val intent = Intent(this@MainActivity, WarmService::class.java)
                 isStarted = !isStarted
+                intent.putExtra("isStarted", isStarted)
                 if (isStarted) {
                     seekBarIntensity.isEnabled = false
-                    startService(intent.putExtra("intensity", seekBarIntensity.progress))
+                    intent.putExtra("intensity", seekBarIntensity.progress + 1)
                     buttonStart.text = resources.getString(R.string.stop)
                 } else {
                     seekBarIntensity.isEnabled = true
-                    stopService(intent)
                     buttonStart.text = resources.getString(R.string.start)
                 }
+                startService(intent)
             }
         }
     }
