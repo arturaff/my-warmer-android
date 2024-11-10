@@ -11,4 +11,6 @@
     <string name="app_info">The application will help maintain normal battery temperature in the cold winter so that the phone does not turn off in the cold and does not catch condensation</string>
     <string name="intensity_info">You can choose 3 intensity modes.\n\nFirst mode: Suitable for maintaining the temperature when outside is from -10 to -20.\n\nSecond mode: Suitable for maintaining temperature when outside is from -20 to -25.\n\nThird mode: Suitable for maintaining temperature when the street is -25 or more and if you accidentally dropped your phone in a snowdrift for a long time</string>
     <string name="intensity_modes">Intensity modes</string>
+    <string name="service_has_been_launched">Service has been launched</string>
+    <string name="click_to_open_app">Click to open app</string>
 </resources>

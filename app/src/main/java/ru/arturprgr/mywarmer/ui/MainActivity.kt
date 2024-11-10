@@ -1,11 +1,20 @@
 package ru.arturprgr.mywarmer.ui
 
+import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ru.arturprgr.mywarmer.R
@@ -15,11 +24,37 @@ import ru.arturprgr.mywarmer.service.WarmService
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private var isStarted: Boolean = false
+    private lateinit var notificationBuilder: NotificationCompat.Builder
+    private lateinit var notificationManager: NotificationManagerCompat
+    private val channelId = "Warmer App"
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.w("WarmerApp", "MainActivity: onDestroy()")
+    }
+
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        notificationBuilder = NotificationCompat.Builder(this@MainActivity, channelId)
+            .setSmallIcon(R.drawable.ic_info)
+            .setContentTitle(resources.getString(R.string.service_has_been_launched))
+            .setContentText(resources.getString(R.string.click_to_open_app))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT).setContentIntent(
+                PendingIntent.getActivity(
+                    this@MainActivity,
+                    0,
+                    Intent(this@MainActivity, MainActivity::class.java),
+                    PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
+        notificationManager = NotificationManagerCompat.from(this@MainActivity)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) notificationManager.createNotificationChannel(
+            NotificationChannel(
+                channelId, "Информация о состоянии сервиса", NotificationManager.IMPORTANCE_DEFAULT
+            )
+        )
 
         enableEdgeToEdge()
         setContentView(binding.root)
@@ -33,6 +68,10 @@ class MainActivity : AppCompatActivity() {
             registerReceiver(
                 TempReceiver(textBatteryTemp), IntentFilter(Intent.ACTION_BATTERY_CHANGED)
             )
+            @Suppress("DEPRECATION") when (this@MainActivity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+                Configuration.UI_MODE_NIGHT_YES -> buttonStart.setTextColor(resources.getColor(R.color.color_light))
+                Configuration.UI_MODE_NIGHT_NO -> buttonStart.setTextColor(resources.getColor(R.color.color_dark))
+            }
 
             buttonInfo.setOnClickListener {
                 createDialog(
@@ -49,18 +88,18 @@ class MainActivity : AppCompatActivity() {
             }
 
             buttonStart.setOnClickListener {
-                val intent = Intent(this@MainActivity, WarmService::class.java)
-                isStarted = !isStarted
-                intent.putExtra("isStarted", isStarted)
-                if (isStarted) {
-                    seekBarIntensity.isEnabled = false
-                    intent.putExtra("intensity", seekBarIntensity.progress + 1)
+                val intentService = Intent(this@MainActivity, WarmService::class.java)
+                intentService.putExtra("isStarted", seekBarIntensity.isEnabled)
+                seekBarIntensity.isEnabled = !seekBarIntensity.isEnabled
+                if (!seekBarIntensity.isEnabled) {
+                    intentService.putExtra("intensity", seekBarIntensity.progress + 1)
                     buttonStart.text = resources.getString(R.string.stop)
+                    notificationManager.notify(1, notificationBuilder.build())
                 } else {
-                    seekBarIntensity.isEnabled = true
                     buttonStart.text = resources.getString(R.string.start)
+                    notificationManager.cancel(1)
                 }
-                startService(intent)
+                startService(intentService)
             }
         }
     }

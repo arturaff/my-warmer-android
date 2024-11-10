@@ -14,10 +14,9 @@ class WarmService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intensity = intent!!.getIntExtra("intensity", 0)
         isStarted = intent.getBooleanExtra("isStarted", false)
-        Log.d("WarmerLog", "intensity: $intensity")
-        Log.d("WarmerLog", "isStarted: $isStarted")
+        Log.d("WarmerApp", "WarmService: intensity: $intensity, isStarted: $isStarted")
         thread = Thread {
-            while (isStarted) for (i in 1..intensity) Log.d("HotLog", Random().nextLong().toString())
+            while (isStarted) for (i in 1..intensity) Random().nextLong().toString()
         }
         thread.start()
         return START_NOT_STICKY
@@ -25,12 +24,13 @@ class WarmService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        Log.d("WarmerLog", "Сервис запущен!")
+        Log.w("WarmerApp", "WarmService: onCreate()")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("WarmerLog", "Сервис остановлен!")
+
+        Log.w("WarmerApp", "WarmService: onDestroy()")
     }
 
     override fun onBind(intent: Intent?): IBinder? {
